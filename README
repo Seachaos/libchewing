@@ -63,6 +63,7 @@ IIIMF, SCIM, OpenVanilla, Microsoft IME, UIM, ibus, etc.
 # ./configure --prefix=/usr
   (If you checkout from GIT, make sure running ./autogen.sh
    before this.)
+ 	(If folder 'm4' is not exsit, make it.)
 # make
 # make install
 
