@@ -561,7 +561,7 @@ open_multi_hash_file:
 	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
 	item_index = 0;
 	if ( dump == NULL || fsize < hdrlen ) {
-		_createUHashFile(hashfilename,dump);
+		_createUHashFile(hashfilename, dump);
 	}else {
 		static int is_set_pHead = 0;
 		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
@@ -617,12 +617,15 @@ open_multi_hash_file:
 			pItem->data.recentTime -= oldest;
 		}
 		chewing_lifetime -= oldest;
-		++nData;
+
+		
 	}
 
+	++nData;
 	if ( nData < MAX_UHASH_FILE ) {
 		goto open_multi_hash_file;
 	}
+
 	strcpy ( hashfilename, hashfilename_prefix );
 	strcat( hashfilename, HASH_FILE );
 	addTerminateService( TerminateHash );
