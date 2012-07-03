@@ -136,8 +136,8 @@ int main( int argc, char *argv[] )
 {
 	FILE *infile;
 	FILE *dictfile, *treedata, *ph_index;
-	char in_file[ MAX_FILE_NAME ] = "tsi.src";
-	long i, k;
+	char in_file[2][ MAX_FILE_NAME ] = {"tsi.src", "xd.src"};
+	long i, k, infileNum;
     int tmp;
 #ifdef USE_BINARY_DATA
 	unsigned char size;
@@ -148,12 +148,9 @@ int main( int argc, char *argv[] )
 	else 
 		strcpy( in_file, argv[ 1 ] );
 
-	infile = fopen( in_file, "r" );
+	
 
-	if ( !infile ) {
-		fprintf ( stderr, "Error opening %s for reading!\n", in_file );
-		exit( -1 );
-	}
+	
 
 #ifdef USE_BINARY_DATA
 	dictfile = fopen( DICT_FILE, "wb" );
@@ -168,6 +165,13 @@ int main( int argc, char *argv[] )
 		fprintf( stderr, "Error opening output file!\n" );
 		exit( -1 );
 	}
+for(infileNum=0; infileNum<2; ++infileNum)
+{
+	infile = fopen( in_file[infileNum], "r" );
+	if ( !infile ) {
+		fprintf ( stderr, "Error opening %s for reading!\n", in_file[infileNum] );
+		exit( -1 );
+	}
 
 	while ( fgets( data[ nData ].str, MAXLEN, infile ) ) {
 		DataStripSpace( nData );
@@ -178,6 +182,7 @@ int main( int argc, char *argv[] )
 		DataStripAll( nData );
 		nData++;
 	}
+}
 	qsort( data, nData, sizeof( RECORD ), CompRecord );
 
 	for ( i = 0; i < nData - 1; i++ ) {
