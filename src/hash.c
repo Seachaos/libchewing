@@ -25,6 +25,11 @@
 #include "private.h"
 #include "global.h"
 
+// these 3 lines code MUST BE IN hash-private.h
+#define MAX_FILE_NAME (256)
+#define MAX_UHASH_FILE_NUM (1 + 2)
+int _loadUHashData( const char *path, const char *in_file );
+
 int chewing_lifetime;
 
 static HASH_ITEM *hashtable[ HASH_TABLE_SIZE ];
@@ -456,7 +461,7 @@ static int ComputeChewingLifeTime()
        i = 0;
 
        chewing_lifetime++;
-       min = chewing_lifetime;
+       min = c hewing_lifetime;
 
        while ( hashtable[ i ] ) {
                item = hashtable[ i ];
@@ -500,8 +505,9 @@ static void TerminateHash()
 	pHead = NULL;
 }
 
-int InitHash( const char *path )
+int _loadUHashData( const char *path, const char *in_file )
 {
+	char hashfilename_prefix[ 200 ];
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
@@ -510,23 +516,25 @@ int InitHash( const char *path )
 	if ( access( path, W_OK ) != 0 ) {
 		if ( getenv( "HOME" ) ) {
 			sprintf(
-				hashfilename, "%s%s", 
+				hashfilename_prefix, "%s%s", 
 				getenv( "HOME" ), CHEWING_HASH_PATH );
 		}
 		else {
 			sprintf(
-				hashfilename, "%s%s",
+				hashfilename_prefix, "%s%s",
 				PLAT_TMPDIR, CHEWING_HASH_PATH );
 		}
 		PLAT_MKDIR( hashfilename );
-		strcat( hashfilename, PLAT_SEPARATOR );
-		strcat( hashfilename, HASH_FILE );
+		strcat( hashfilename_prefix, PLAT_SEPARATOR );
 	} else {
-		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
+		sprintf( hashfilename_prefix, "%s" PLAT_SEPARATOR, path );
 	}
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 
-open_hash_file:
+open_multi_hash_file:
+	strcpy ( hashfilename, hashfilename_prefix );
+	strcat ( hashfilename, in_file );
+
 	dump = _load_hash_file( hashfilename, &fsize );
 	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
 	item_index = 0;
@@ -553,7 +561,7 @@ open_hash_file:
 			if ( ! migrate_hash_to_bin( hashfilename ) ) {
 				return  0;
 			}
-			goto open_hash_file;
+			goto open_multi_hash_file;
 		}
 
 		chewing_lifetime = *(int *) (dump + strlen( BIN_HASH_SIG ));
@@ -601,7 +609,29 @@ open_hash_file:
 		}
 		chewing_lifetime -= oldest;
 	}
+	if ( strcmp( in_file, HASH_FILE ) != 0  )
+	{
+		strcpy ( hashfilename, hashfilename_prefix );
+		strcat( hashfilename, HASH_FILE );
+	}
 	addTerminateService( TerminateHash );
 	return 1;
+}
+
+int InitHash( const char *path )
+{
+	char in_file[ MAX_UHASH_FILE_NUM ][ MAX_FILE_NAME ] = {
+		HASH_FILE,
+		"uhash1.dat",
+		"uhash2.dat"
+	};
+
+	int _i = 0, succeed_file_num = 0;
+	for ( _i = 0; _i < MAX_UHASH_FILE_NUM; _i++ )
+	{
+		succeed_file_num +=  _loadUHashData( path, in_file[ _i ] );
+	}
+
+	return (( succeed_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
 }
 
