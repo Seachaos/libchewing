@@ -36,6 +36,7 @@
 #define MAXLEN		149
 #define MAXZUIN		9
 #define MAX_FILE_NAME	(256)
+#define MAX_TSI_FILE_NUM (1 + 1)
 
 #define IN_FILE		"phoneid.dic"
 
@@ -136,21 +137,28 @@ int main( int argc, char *argv[] )
 {
 	FILE *infile;
 	FILE *dictfile, *treedata, *ph_index;
-	char in_file[2][ MAX_FILE_NAME ] = {"tsi.src", "xd.src"};
-	long i, k, infileNum;
-    int tmp;
+	char in_file[ MAX_TSI_FILE_NUM ][ MAX_FILE_NAME ] = {
+		"tsi.src",
+		"xd.src"
+	};
+	long i, k;
+	int tmp;
+	int file_not_exist_num = 0;
 #ifdef USE_BINARY_DATA
 	unsigned char size;
 #endif
 
-	if ( argc < 2 ) 
+	if ( argc < 2 )
+	{
 		printf( user_msg );
-	else 
-		strcpy( in_file, argv[ 1 ] );
-
-	
-
-	
+	}
+	else
+	{
+		for ( i = 1; i < argc; i++ )
+		{
+			strcpy( in_file[ i - 1 ], argv[ i ] );
+		}
+	}
 
 #ifdef USE_BINARY_DATA
 	dictfile = fopen( DICT_FILE, "wb" );
@@ -165,24 +173,29 @@ int main( int argc, char *argv[] )
 		fprintf( stderr, "Error opening output file!\n" );
 		exit( -1 );
 	}
-for(infileNum=0; infileNum<2; ++infileNum)
-{
-	infile = fopen( in_file[infileNum], "r" );
-	if ( !infile ) {
-		fprintf ( stderr, "Error opening %s for reading!\n", in_file[infileNum] );
-		exit( -1 );
-	}
 
-	while ( fgets( data[ nData ].str, MAXLEN, infile ) ) {
-		DataStripSpace( nData );
-		/* Ignore '#' comment for tsi.src */
-		if ( data[ nData ].str[0] == '\n' )
+	for ( i = 0; i <  MAX_TSI_FILE_NUM; i++ )
+	{
+		infile = fopen( in_file[ i ], "r" );
+		if ( !infile ) {
+			fprintf ( stderr, "Error opening %s for reading!\n", in_file[ i ] );
+			++file_not_exist_num;
 			continue;
-		DataSetNum( nData );
-		DataStripAll( nData );
-		nData++;
+		}
+		while ( fgets( data[ nData ].str, MAXLEN, infile ) ) {
+			DataStripSpace( nData );
+			/* Ignore '#' comment for tsi.src */
+			if ( data[ nData ].str[0] == '\n' )
+				continue;
+			DataSetNum( nData );
+			DataStripAll( nData );
+			nData++;
+		}
+		fclose( infile );
 	}
-}
+	if ( file_not_exist_num == MAX_TSI_FILE_NUM ) {
+		exit(-1);
+	}
 	qsort( data, nData, sizeof( RECORD ), CompRecord );
 
 	for ( i = 0; i < nData - 1; i++ ) {
@@ -226,7 +239,6 @@ for(infileNum=0; infileNum<2; ++infileNum)
 			fprintf (treedata, "%hu ", data[ i ].num[ k ] );
 		fprintf( treedata, "0\n" );
 	}
-	fclose( infile );
 	fclose( ph_index );
 	fclose( dictfile );
 	fclose( treedata );
