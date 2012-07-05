@@ -461,7 +461,7 @@ static int ComputeChewingLifeTime()
        i = 0;
 
        chewing_lifetime++;
-       min = c hewing_lifetime;
+       min = chewing_lifetime;
 
        while ( hashtable[ i ] ) {
                item = hashtable[ i ];
@@ -531,7 +531,7 @@ int _loadUHashData( const char *path, const char *in_file )
 	}
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 
-open_multi_hash_file:
+open_hash_file:
 	strcpy ( hashfilename, hashfilename_prefix );
 	strcat ( hashfilename, in_file );
 
@@ -561,7 +561,7 @@ open_multi_hash_file:
 			if ( ! migrate_hash_to_bin( hashfilename ) ) {
 				return  0;
 			}
-			goto open_multi_hash_file;
+			goto open_hash_file;
 		}
 
 		chewing_lifetime = *(int *) (dump + strlen( BIN_HASH_SIG ));
@@ -626,12 +626,12 @@ int InitHash( const char *path )
 		"uhash2.dat"
 	};
 
-	int _i = 0, succeed_file_num = 0;
+	int _i = 0, _loaded_file_num = 0;
 	for ( _i = 0; _i < MAX_UHASH_FILE_NUM; _i++ )
 	{
-		succeed_file_num +=  _loadUHashData( path, in_file[ _i ] );
+		_loaded_file_num +=  _loadUHashData( path, in_file[ _i ] );
 	}
 
-	return (( succeed_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
+	return (( _loaded_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
 }
 
