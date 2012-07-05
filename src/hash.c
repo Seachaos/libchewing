@@ -25,10 +25,10 @@
 #include "private.h"
 #include "global.h"
 
-// these 3 lines code MUST BE IN hash-private.h
 #define MAX_FILE_NAME (256)
+
+// for Multi user hash file data number, default file is "uhash.dat"
 #define MAX_UHASH_FILE_NUM (1 + 2)
-int _loadUHashData( const char *path, const char *in_file );
 
 int chewing_lifetime;
 
@@ -505,7 +505,7 @@ static void TerminateHash()
 	pHead = NULL;
 }
 
-int _loadUHashData( const char *path, const char *in_file )
+int _load_hash_data( const char *path, const char *in_file )
 {
 	char hashfilename_prefix[ 200 ];
 	HASH_ITEM item, *pItem, *pPool = NULL;
@@ -626,12 +626,12 @@ int InitHash( const char *path )
 		"uhash2.dat"
 	};
 
-	int _i = 0, _loaded_file_num = 0;
-	for ( _i = 0; _i < MAX_UHASH_FILE_NUM; _i++ )
+	int i = 0, loaded_file_num = 0;
+	for ( i = 0; i < MAX_UHASH_FILE_NUM; i++ )
 	{
-		_loaded_file_num +=  _loadUHashData( path, in_file[ _i ] );
+		loaded_file_num += _load_hash_data( path, in_file[ i ] );
 	}
 
-	return (( _loaded_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
+	return (( loaded_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
 }
 
