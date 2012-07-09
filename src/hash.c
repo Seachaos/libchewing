@@ -25,11 +25,18 @@
 #include "private.h"
 #include "global.h"
 
+<<<<<<< HEAD
 #define USE_MULTI_UHASH_DATA 1
 #ifdef USE_MULTI_UHASH_DATA
 #define MAX_FILE_NAME (256)
 #define MAX_UHASH_FILE (1 + 2)
 #endif
+=======
+#define MAX_FILE_NAME (256)
+
+// for Multi user hash file data number, default file is "uhash.dat"
+#define MAX_UHASH_FILE_NUM (1 + 2)
+>>>>>>> e88d715981e3858b80def452834c83c9b3215590
 
 int chewing_lifetime;
 
@@ -506,6 +513,7 @@ static void TerminateHash()
 	pHead = NULL;
 }
 
+<<<<<<< HEAD
 void _createUHashFile(char *hashfilename, char *dump){
 	FILE *outfile;
 	outfile = fopen( hashfilename, "w+b" );
@@ -633,6 +641,11 @@ open_multi_hash_file:
 }
 
 int _loadSingleHashData( const char *path){
+=======
+int _load_hash_data( const char *path, const char *in_file )
+{
+	char hashfilename_prefix[ 200 ];
+>>>>>>> e88d715981e3858b80def452834c83c9b3215590
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
@@ -641,23 +654,25 @@ int _loadSingleHashData( const char *path){
 	if ( access( path, W_OK ) != 0 ) {
 		if ( getenv( "HOME" ) ) {
 			sprintf(
-				hashfilename, "%s%s", 
+				hashfilename_prefix, "%s%s", 
 				getenv( "HOME" ), CHEWING_HASH_PATH );
 		}
 		else {
 			sprintf(
-				hashfilename, "%s%s",
+				hashfilename_prefix, "%s%s",
 				PLAT_TMPDIR, CHEWING_HASH_PATH );
 		}
 		PLAT_MKDIR( hashfilename );
-		strcat( hashfilename, PLAT_SEPARATOR );
-		strcat( hashfilename, HASH_FILE );
+		strcat( hashfilename_prefix, PLAT_SEPARATOR );
 	} else {
-		sprintf( hashfilename, "%s" PLAT_SEPARATOR "%s", path, HASH_FILE );
+		sprintf( hashfilename_prefix, "%s" PLAT_SEPARATOR, path );
 	}
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 
 open_hash_file:
+	strcpy ( hashfilename, hashfilename_prefix );
+	strcat ( hashfilename, in_file );
+
 	dump = _load_hash_file( hashfilename, &fsize );
 	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
 	item_index = 0;
@@ -732,16 +747,37 @@ open_hash_file:
 		}
 		chewing_lifetime -= oldest;
 	}
+	if ( strcmp( in_file, HASH_FILE ) != 0  )
+	{
+		strcpy ( hashfilename, hashfilename_prefix );
+		strcat( hashfilename, HASH_FILE );
+	}
 	addTerminateService( TerminateHash );
 	return 1;
 }
 
 int InitHash( const char *path )
 {
+<<<<<<< HEAD
 #ifdef USE_MULTI_UHASH_DATA
 	return _loadMultiHashData(path);
 #else
 	return _loadSingleHashData(path);
 #endif
+=======
+	char in_file[ MAX_UHASH_FILE_NUM ][ MAX_FILE_NAME ] = {
+		HASH_FILE,
+		"uhash1.dat",
+		"uhash2.dat"
+	};
+
+	int i = 0, loaded_file_num = 0;
+	for ( i = 0; i < MAX_UHASH_FILE_NUM; i++ )
+	{
+		loaded_file_num += _load_hash_data( path, in_file[ i ] );
+	}
+
+	return (( loaded_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
+>>>>>>> e88d715981e3858b80def452834c83c9b3215590
 }
 
