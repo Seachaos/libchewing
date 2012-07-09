@@ -25,18 +25,10 @@
 #include "private.h"
 #include "global.h"
 
-<<<<<<< HEAD
-#define USE_MULTI_UHASH_DATA 1
-#ifdef USE_MULTI_UHASH_DATA
-#define MAX_FILE_NAME (256)
-#define MAX_UHASH_FILE (1 + 2)
-#endif
-=======
 #define MAX_FILE_NAME (256)
 
 // for Multi user hash file data number, default file is "uhash.dat"
 #define MAX_UHASH_FILE_NUM (1 + 2)
->>>>>>> e88d715981e3858b80def452834c83c9b3215590
 
 int chewing_lifetime;
 
@@ -469,7 +461,7 @@ static int ComputeChewingLifeTime()
        i = 0;
 
        chewing_lifetime++;
-       min = c hewing_lifetime;
+       min = chewing_lifetime;
 
        while ( hashtable[ i ] ) {
                item = hashtable[ i ];
@@ -513,139 +505,9 @@ static void TerminateHash()
 	pHead = NULL;
 }
 
-<<<<<<< HEAD
-void _createUHashFile(char *hashfilename, char *dump){
-	FILE *outfile;
-	outfile = fopen( hashfilename, "w+b" );
-	if ( ! outfile ) {
-		if ( dump ) {
-			free( dump );
-		}
-		return 0;
-	}
-	chewing_lifetime = 0;
-	fwrite( BIN_HASH_SIG, 1, strlen( BIN_HASH_SIG ), outfile );
-	fwrite( &chewing_lifetime, 1,
-			sizeof(chewing_lifetime), outfile );
-	fclose( outfile );
-
-}
-
-int _loadMultiHashData( const char *path){
-	char hashfilename_prefix[ 200 ];
-	HASH_ITEM item, *pItem, *pPool = NULL;
-	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
-	char *dump, *seekdump;
-
-	long nData = 0;
-	
-	char in_file[ 3 ][ MAX_FILE_NAME ] = {HASH_FILE, "uhash1.dat", "uhash2.dat"};
-
-	/* make sure of write permission */
-	if ( access( path, W_OK ) != 0 ) {
-		if ( getenv( "HOME" ) ) {
-			sprintf(
-				hashfilename_prefix, "%s%s", 
-				getenv( "HOME" ), CHEWING_HASH_PATH );
-		}
-		else {
-			sprintf(
-				hashfilename_prefix, "%s%s",
-				PLAT_TMPDIR, CHEWING_HASH_PATH );
-		}
-		PLAT_MKDIR( hashfilename );
-		strcat( hashfilename_prefix, PLAT_SEPARATOR );
-	} else {
-		sprintf( hashfilename_prefix, "%s" PLAT_SEPARATOR, path );
-	}
-	memset( hashtable, 0, HASH_TABLE_SIZE );
-
-open_multi_hash_file:
-	if ( nData != 0 ) {
-		strcpy ( hashfilename, hashfilename_prefix );
-	}
-	strcat ( hashfilename, in_file[ nData ]) ;
-	dump = _load_hash_file( hashfilename, &fsize );
-	hdrlen = strlen( BIN_HASH_SIG ) + sizeof(chewing_lifetime);
-	item_index = 0;
-	if ( dump == NULL || fsize < hdrlen ) {
-		_createUHashFile(hashfilename, dump);
-	}else {
-		static int is_set_pHead = 0;
-		if ( memcmp(dump, BIN_HASH_SIG, strlen(BIN_HASH_SIG)) != 0 ) {
-			/* perform migrate from text-based to binary form */
-			free( dump );
-			if ( ! migrate_hash_to_bin( hashfilename ) ) {
-				return  0;
-			}
-			goto open_multi_hash_file;
-		}
-
-		chewing_lifetime = *(int *) (dump + strlen( BIN_HASH_SIG ));
-		seekdump = dump + hdrlen;
-		fsize -= hdrlen;
-
-		while ( fsize >= FIELD_SIZE ) {
-			iret = ReadHashItem_bin( seekdump, &item, item_index++ );
-			/* Ignore illegal data */
-			if ( iret == -1 ) {
-				seekdump += FIELD_SIZE;
-				fsize -= FIELD_SIZE;
-				--item_index;
-				continue;
-			}
-			else if ( iret == 0 )
-				break;
-
-			pItem = ALC( HASH_ITEM, 1 );
-			memcpy( pItem, &item, sizeof( HASH_ITEM ) );
-			pItem->next = pPool;
-			pPool = pItem;
-			if ( ! is_set_pHead ) {
-				pHead = pItem;
-				is_set_pHead = 1;
-			}
-
-			if ( oldest > pItem->data.recentTime ) {
-				oldest = pItem->data.recentTime;
-			}
-
-			seekdump += FIELD_SIZE;
-			fsize -= FIELD_SIZE;
-		}
-		free( dump );
-
-		while ( pPool ) {
-			pItem = pPool;
-			pPool = pItem->next;
-
-			hashvalue = HashFunc( pItem->data.phoneSeq );
-			pItem->next = hashtable[ hashvalue ];
-			hashtable[ hashvalue ] = pItem;
-			pItem->data.recentTime -= oldest;
-		}
-		chewing_lifetime -= oldest;
-
-		
-	}
-
-	++nData;
-	if ( nData < MAX_UHASH_FILE ) {
-		goto open_multi_hash_file;
-	}
-
-	strcpy ( hashfilename, hashfilename_prefix );
-	strcat( hashfilename, HASH_FILE );
-	addTerminateService( TerminateHash );
-	return 1;
-}
-
-int _loadSingleHashData( const char *path){
-=======
 int _load_hash_data( const char *path, const char *in_file )
 {
 	char hashfilename_prefix[ 200 ];
->>>>>>> e88d715981e3858b80def452834c83c9b3215590
 	HASH_ITEM item, *pItem, *pPool = NULL;
 	int item_index, hashvalue, iret, fsize, hdrlen, oldest = INT_MAX;
 	char *dump, *seekdump;
@@ -758,13 +620,6 @@ open_hash_file:
 
 int InitHash( const char *path )
 {
-<<<<<<< HEAD
-#ifdef USE_MULTI_UHASH_DATA
-	return _loadMultiHashData(path);
-#else
-	return _loadSingleHashData(path);
-#endif
-=======
 	char in_file[ MAX_UHASH_FILE_NUM ][ MAX_FILE_NAME ] = {
 		HASH_FILE,
 		"uhash1.dat",
@@ -778,6 +633,5 @@ int InitHash( const char *path )
 	}
 
 	return (( loaded_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
->>>>>>> e88d715981e3858b80def452834c83c9b3215590
 }
 
