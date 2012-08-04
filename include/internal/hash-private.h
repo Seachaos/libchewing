@@ -41,4 +41,6 @@ int AlcUserPhraseSeq( UserPhraseData *pData, int phonelen, int wordlen );
 int InitHash( const char *path );
 void FreeHashTable( void );
 
+int _load_hash_data( const char *path, const char *in_file );
+
 #endif

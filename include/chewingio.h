@@ -545,6 +545,17 @@ CHEWING_API uint16 *chewing_get_phoneSeq( ChewingContext *ctx );
  * @param ctx
  */
 CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx );
+
+/**
+ * @brief dynamic loading directory data used by Chewing IM
+ *
+ * @param hashPath (read-write) the path where user-defined hash data stores
+ * @param hashFileName the file name of hash data will be loaded
+ * @retval 0 if succeed
+ */
+CHEWING_API int chewing_load_hashData( const char *hashPath, const char *hashFileName );
+
+
 /*@}*/
 
 #endif /* _CHEWING_IO_H */

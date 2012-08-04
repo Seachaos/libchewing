@@ -622,13 +622,18 @@ int InitHash( const char *path )
 {
 	char in_file[ MAX_UHASH_FILE_NUM ][ MAX_FILE_NAME ] = {
 		HASH_FILE,
-		"uhash1.dat",
-		"uhash2.dat"
+		NULL, 
+		NULL
 	};
 
 	int i = 0, loaded_file_num = 0;
 	for ( i = 0; i < MAX_UHASH_FILE_NUM; i++ )
 	{
+		if( in_file[i] == NULL )
+		{
+			continue;
+		}
+
 		loaded_file_num += _load_hash_data( path, in_file[ i ] );
 	}
 

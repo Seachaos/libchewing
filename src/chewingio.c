@@ -1111,10 +1111,10 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 		/* num starts from 0 */
 		num = CountSelKeyNum( key, pgdata );
 		if ( num >= 0 ) {
-			DoSelect( pgdata, num );
+			DoSelect( pgdata, num );	
 			goto End_keyproc;
 		}
-		
+	
 		/* Otherwise, use 'j' and 'k' for paging in selection mode */
 		DEBUG_OUT(
 			"\t\tchecking paging key, got '%c'\n",
@@ -1150,7 +1150,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	else {
 		if ( pgdata->bChiSym == CHINESE_MODE ) {
 			if ( pgdata->config.bEasySymbolInput != 0 ) {
-				EasySymbolInput( key, pgdata );
+				EasySymbolInput( key, pgdata );	
 				goto End_keyproc;
 			}
 
@@ -1176,7 +1176,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 				case ZUIN_ABSORB:
 					keystrokeRtn = KEYSTROKE_ABSORB;
 					break;
-				case ZUIN_COMMIT:
+				case ZUIN_COMMIT: // buggy
 					AddChi( pgdata->zuinData.phone, pgdata );
 					break;
 				case ZUIN_NO_WORD:
@@ -1243,6 +1243,7 @@ CHEWING_API int chewing_handle_Default( ChewingContext *ctx, int key )
 	}
 
 End_keyproc:
+
 	if ( ! bQuickCommit ) {
 		CallPhrasing( pgdata );
 		if ( ReleaseChiSymbolBuf( pgdata, pgo ) != 0 )
@@ -1467,6 +1468,16 @@ CHEWING_API uint16 *chewing_get_phoneSeq( ChewingContext *ctx )
 CHEWING_API int chewing_get_phoneSeqLen( ChewingContext *ctx )
 {
 	return ctx->data->nPhoneSeq;
+}
+
+CHEWING_API int chewing_load_hashData( const char *hashPath, const char *hashFileName )
+{
+	/* load Hash */
+	/* FIXME: check the validation of hashPath */
+	_load_hash_data( hashPath, hashFileName );
+
+	bTerminateCompleted = 0;
+	return 0;
 }
 
 /* Local Variables: */
