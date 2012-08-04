@@ -529,7 +529,6 @@ int _load_hash_data( const char *path, const char *in_file )
 	} else {
 		sprintf( hashfilename_prefix, "%s" PLAT_SEPARATOR, path );
 	}
-	memset( hashtable, 0, HASH_TABLE_SIZE );
 
 open_hash_file:
 	strcpy ( hashfilename, hashfilename_prefix );
@@ -620,13 +619,17 @@ open_hash_file:
 
 int InitHash( const char *path )
 {
+	int i = 0;
+	int loaded_file_num = 0;
 	char in_file[ MAX_UHASH_FILE_NUM ][ MAX_FILE_NAME ] = {
 		HASH_FILE,
 		NULL, 
 		NULL
 	};
 
-	int i = 0, loaded_file_num = 0;
+	/*	initial hash table	*/
+	memset( hashtable, 0, HASH_TABLE_SIZE );
+
 	for ( i = 0; i < MAX_UHASH_FILE_NUM; i++ )
 	{
 		if( in_file[i] == NULL )
