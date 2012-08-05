@@ -621,24 +621,14 @@ int InitHash( const char *path )
 {
 	int i = 0;
 	int loaded_file_num = 0;
-	char in_file[ MAX_UHASH_FILE_NUM ][ MAX_FILE_NAME ] = {
-		HASH_FILE,
-		NULL, 
-		NULL
+	char in_file[ MAX_FILE_NAME ] = {
+		HASH_FILE
 	};
 
-	/*	initial hash table	*/
+	/*	initial hash table 	*/
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 
-	for ( i = 0; i < MAX_UHASH_FILE_NUM; i++ )
-	{
-		if( in_file[i] == NULL )
-		{
-			continue;
-		}
-
-		loaded_file_num += _load_hash_data( path, in_file[ i ] );
-	}
+	loaded_file_num += _load_hash_data( path, in_file);
 
 	return (( loaded_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
 }
