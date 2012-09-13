@@ -14,11 +14,14 @@
 
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
 #include <limits.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <dirent.h>
+#include <unistd.h>
 
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
@@ -505,6 +508,35 @@ static void TerminateHash()
 	pHead = NULL;
 }
 
+int _create_hash_data_list()
+{
+	DIR * dir;
+	struct dirent * ptr;
+	char filter[] = ".dat";
+	char tmp[256];
+	char hashList[512];
+	int hash_data_count = 0;
+	FILE * fp;
+
+	sprintf(tmp, "%s/.chewing/", getenv("HOME"));
+	dir = opendir (tmp); 
+
+	sprintf(hashList, "%s/hash_data_list.txt", tmp);
+	fp = fopen (hashList, "w+");
+	if (fp != NULL)
+	{
+		while ((ptr = readdir(dir)) != NULL) {
+			if (strstr(ptr->d_name, filter) != NULL) {
+				hash_data_count++;
+				fprintf (fp, "%s%s\n", tmp, ptr->d_name);
+				_load_hash_data(tmp, ptr->d_name);
+			}
+		}
+		closedir (dir);
+	}
+	return hash_data_count;
+}
+
 int _load_hash_data( const char *path, const char *in_file )
 {
 	char hashfilename_prefix[ 200 ];
@@ -628,7 +660,8 @@ int InitHash( const char *path )
 	/*	initial hash table 	*/
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 
-	loaded_file_num += _load_hash_data( path, in_file);
+	_create_hash_data_list();
+	loaded_file_num += _load_hash_data( path, in_file );
 
 	return (( loaded_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
 }
