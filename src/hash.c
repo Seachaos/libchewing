@@ -508,11 +508,16 @@ static void TerminateHash()
 	pHead = NULL;
 }
 
+<<<<<<< HEAD
 int _create_hash_data_list()
+=======
+int _get_hash_data_count()
+>>>>>>> b8ca033ed9572f94a0794bd0fadb44573c597307
 {
 	DIR * dir;
 	struct dirent * ptr;
 	char filter[] = ".dat";
+<<<<<<< HEAD
 	char tmp[256];
 	char hashList[512];
 	int hash_data_count = 0;
@@ -530,6 +535,21 @@ int _create_hash_data_list()
 				hash_data_count++;
 				fprintf (fp, "%s%s\n", tmp, ptr->d_name);
 				_load_hash_data(tmp, ptr->d_name);
+=======
+	int i;
+	int hash_data_count = 0;
+	dir =opendir ("/home/joe10330/.chewing/");
+
+	FILE * fp;
+	fp = fopen ("/home/joe10330/.chewing/hash_data_list.txt", "w+");
+	if (fp != NULL)
+	{
+		while ((ptr = readdir(dir))!=NULL) {
+			if (strstr(ptr->d_name, filter) != NULL)
+			{
+				hash_data_count++;
+				fprintf (fp, "d_name: %s\n", ptr->d_name);
+>>>>>>> b8ca033ed9572f94a0794bd0fadb44573c597307
 			}
 		}
 		closedir (dir);
@@ -660,7 +680,12 @@ int InitHash( const char *path )
 	/*	initial hash table 	*/
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 
+<<<<<<< HEAD
 	_create_hash_data_list();
+=======
+	// use bellow program and run libchewing/test/genkeystroke to create /home/joe10330/.chewing/hash_data_list.txt
+	//_get_hash_data_count();
+>>>>>>> b8ca033ed9572f94a0794bd0fadb44573c597307
 	loaded_file_num += _load_hash_data( path, in_file );
 
 	return (( loaded_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
