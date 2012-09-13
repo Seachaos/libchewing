@@ -14,11 +14,14 @@
 
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 /* ISO C99 Standard: 7.10/5.2.4.2.1 Sizes of integer types */
 #include <limits.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <dirent.h>
+#include <unistd.h>
 
 #include "chewing-utf8-util.h"
 #include "hash-private.h"
@@ -505,6 +508,31 @@ static void TerminateHash()
 	pHead = NULL;
 }
 
+int _get_hash_data_count()
+{
+	DIR * dir;
+	struct dirent * ptr;
+	char filter[] = ".dat";
+	int i;
+	int hash_data_count = 0;
+	dir =opendir ("/home/joe10330/.chewing/");
+
+	FILE * fp;
+	fp = fopen ("/home/joe10330/.chewing/hash_data_list.txt", "w+");
+	if (fp != NULL)
+	{
+		while ((ptr = readdir(dir))!=NULL) {
+			if (strstr(ptr->d_name, filter) != NULL)
+			{
+				hash_data_count++;
+				fprintf (fp, "d_name: %s\n", ptr->d_name);
+			}
+		}
+		closedir (dir);
+	}
+	return hash_data_count;
+}
+
 int _load_hash_data( const char *path, const char *in_file )
 {
 	char hashfilename_prefix[ 200 ];
@@ -628,7 +656,9 @@ int InitHash( const char *path )
 	/*	initial hash table 	*/
 	memset( hashtable, 0, HASH_TABLE_SIZE );
 
-	loaded_file_num += _load_hash_data( path, in_file);
+	// use bellow program and run libchewing/test/genkeystroke to create /home/joe10330/.chewing/hash_data_list.txt
+	//_get_hash_data_count();
+	loaded_file_num += _load_hash_data( path, in_file );
 
 	return (( loaded_file_num == MAX_UHASH_FILE_NUM ) ? 1 : 0 );
 }
